@@ -1,13 +1,36 @@
 // import javax.swing.tree.DefaultMutableTreeNode;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 public class User extends Entity {
+
+    private final Set<String> following;
 
     User(String id) {
         super(id, EntityTypes.GROUP);
+        following = new HashSet<>();
     }
 
     public EntityTypes getMembers() {
         return EntityTypes.USER;
+    }
+
+    public Set<String> following() { //protecting data from changes
+        return Collections.unmodifiableSet(new HashSet<>(following));
+    }
+
+    public void follow(String userId) {
+        following.add(userId);
+    }
+
+    public void unFollow(String userId) {
+        following.remove(userId);
+    }
+
+    public boolean isFollowing(Tweet t) {//
+        return following.contains(t.getId());
     }
 }
 

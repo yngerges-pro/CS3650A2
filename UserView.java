@@ -1,31 +1,27 @@
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-// import java.awt.event.FocusEvent;
-// import java.awt.event.FocusListener;
-import java.util.ArrayList;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.Collection;
+import java.util.Set;
 
 
-public class UserView extends JFrame implements ActionListener{
+public class UserView extends JFrame implements ActionListener, MessageStorage.MessageListener{
     private JButton btnFollow;
-    private ArrayList<String> followers;
-    // private ArrayList<String> followersListAdd;
-    private String userName;
-    // private JScrollPane followersScrollPane;
+    private final User user;
     private JTextField tweetTextField;
     private JTextArea newsFeedTextArea;
-    // private JScrollPane followersListAdd;
     private JTextArea Follow;
-    private JTextField Follow3;
-    // private JScrollPane ShowFollowing;
-    // private Object followersListAdd;
+    private JTextField userToFollowText;
     private String issue;
     
 
-    UserView(String username){
-        this.userName = username;
-        this.setTitle(userName);
+    UserView(User user){
+        this.user = user;
+        this.setTitle(user.getId());
         this.setSize(600,600); //you can adjust the size to match the rectangles
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         JPanel controlPanel = new JPanel();
@@ -86,7 +82,7 @@ public class UserView extends JFrame implements ActionListener{
         btnFollow.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 //where users follow
-                followUser(issue);
+                followUser(userToFollowText.getText());
             }
         });
         panel.add(btnFollow, gbc);
@@ -95,11 +91,10 @@ public class UserView extends JFrame implements ActionListener{
         gbc.gridy = 6;
         gbc.gridwidth = 1;
         gbc.gridheight = 2;
-        followers = new ArrayList<>(); //list of following users
-        Follow3 = new JTextField();
-        Follow3.setBorder(BorderFactory.createTitledBorder("Follow User")); //inputs users
+        userToFollowText = new JTextField();
+        userToFollowText.setBorder(BorderFactory.createTitledBorder("Follow User")); //inputs users
 
-        panel.add(Follow3, gbc);
+        panel.add(userToFollowText, gbc);
         // panel.add(new JScrollPane(Follow3), gbc);
 
         
@@ -114,7 +109,7 @@ public class UserView extends JFrame implements ActionListener{
         panel.add(new JScrollPane(Follow), gbc);
         // panel.add(Follow, gbc);
 
-        issue = Follow3.getText().trim();
+        issue = userToFollowText.getText().trim();
         // Follow.append(issue);
 
     
@@ -127,43 +122,66 @@ public class UserView extends JFrame implements ActionListener{
         JButton btnPostTweet = new JButton("Post Tweet");
         btnPostTweet.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                postTweet(userName);
+                String tweet = tweetTextField.getText().trim();
+                if (!tweet.isEmpty() && !tweet.equals("Tweet message here...")) {
+                        postTweet(tweet);
+                }
             }
         });
         panel.add(btnPostTweet, gbc);
-
+        displayFollowing();
         this.setVisible(true);
+        MessageStorage.getInstance().addChangeListener(this);
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                super.windowClosing(e);
+            MessageStorage.getInstance().removeChangeListener(UserView.this);
+            }
+            
+        });
     }
 
-    private void followUser(String userName) {
-        
-        followers.add(userName);
-        // updateFollowersList();
-    if(!userName.isEmpty()){
-        Follow.append(userName);
-    }
+    public void onChange() {
+        displayFeed();
     }
 
-    private void postTweet(String userName) {
-        String tweet = tweetTextField.getText().trim();
-        if (!tweet.isEmpty() && !tweet.equals("Tweet message here...")) {
-        
-            newsFeedTextArea.append(userName + ": " + tweet + "\n");
-            tweetTextField.setText("Tweet message here...");
+    private void displayFeed() {
+        Collection<Tweet> tweets = MessageStorage.getInstance().getLatest(this.user);
+
+        System.out.println("display Feed called for " + user.getId());
+        // TODO - display the tweet live feed
+    }
+
+    private void displayFollowing() {
+        Set<String> following = this.user.following();
+        System.out.println("display following called for " + user.getId() 
+            + " following list = [" + String.join(", ", user.following()) + "]");
+        // TODO - display following list
+    }
+
+    private void followUser(String userId) {
+        if(userId != null && !userId.isEmpty()){
+            this.user.follow(userId);
         }
+        displayFollowing();
+    }
+
+    private void postTweet(String tweet) {
+        MessageStorage.getInstance().postTweet(this.user, tweet);
     }
 
     // private void updateFollowersList() {
     //     (followersListAdd).setListData(followers.toArray(new String[0]));
     // }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run(){
-                new UserView(JOptionPane.showInputDialog("Enter your username: "));
-            }
-        });
-    }
+    // public static void main(String[] args) {
+    //     SwingUtilities.invokeLater(new Runnable() {
+    //         public void run(){
+    //             new UserView(JOptionPane.showInputDialog("Enter your username: "));
+    //         }
+    //     });
+    // }
 
     @Override
     public void actionPerformed(ActionEvent e) {

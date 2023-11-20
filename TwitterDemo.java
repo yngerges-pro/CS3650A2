@@ -9,8 +9,8 @@ import java.awt.event.ActionListener;
 
 //Allow users to follow
 //Allow posts to show across all posts
-//Look through the patterns
 //Add stats on messages and Positive words
+//Look through the patterns
 
 public class TwitterDemo implements ActionListener {
     private JTree directoryTree;
@@ -53,7 +53,7 @@ public class TwitterDemo implements ActionListener {
             String username = userInput.getText();
             // this.text = username;
             try{
-                Group newUser = entityManager.createGroup(username);
+                User newUser = entityManager.createUser(username);
                 DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) directoryTree.getLastSelectedPathComponent(); //gets last clicked path component
                 if (selectedNode == null) {
                     selectedNode = rootNode;}
@@ -99,8 +99,8 @@ public class TwitterDemo implements ActionListener {
         JButton viewUserBtn = new JButton("Show User View");
         viewUserBtn.addActionListener(e->{
             DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) directoryTree.getLastSelectedPathComponent(); //gets last clicked path component
-            String name = selectedNode.toString();
-            (new UserView(name)).setVisible(true); // will open UserView
+            User user = (User) selectedNode.getUserObject();
+            (new UserView(user)).setVisible(true); // will open UserView
         });
         controlPanel.add(viewUserBtn, c);
 

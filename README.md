@@ -3,4 +3,4 @@ Mini-Twitter
 
 ## Please run through TwitterDemo.java. Thank you! :)
 
-[click here to view my A2 Youtube Video](https://youtu.be/ka5ShEbvXIM)
+[click here to view my A2 Youtube Video](https://youtu.be/WQuK03qFj3M)

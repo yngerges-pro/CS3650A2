@@ -7,8 +7,6 @@ import javax.swing.tree.DefaultTreeModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-//Allow users to follow
-//Allow posts to show across all posts
 //Add stats on messages and Positive words
 //Look through the patterns
 
@@ -19,6 +17,12 @@ public class TwitterDemo implements ActionListener {
     private final EntityManager entityManager;
     private UserCount userCount;
     private GroupCount groCount;
+    // private MessageCount MessageCountStorage;
+    // private User user;
+    public MessageStorage storage;
+    // private int count;
+    // private UserView countMessage;
+    // public JButton messageCountbtn;
 
     TwitterDemo(){
         this.entityManager = EntityManager.getInstance();
@@ -42,7 +46,7 @@ public class TwitterDemo implements ActionListener {
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1;
-        userInput = new JTextArea("User ");
+        userInput = new JTextArea("User");
         controlPanel.add(userInput, c);
 
         c.gridx = 1;
@@ -50,7 +54,7 @@ public class TwitterDemo implements ActionListener {
         JButton addUserBtn = new JButton("Add User");
         userCount = new UserCount(0);
         addUserBtn.addActionListener(event->{
-            String username = userInput.getText();
+            String username = userInput.getText().trim();
             // this.text = username;
             try{
                 User newUser = entityManager.createUser(username);
@@ -69,7 +73,7 @@ public class TwitterDemo implements ActionListener {
         
         c.gridx = 0;
         c.gridy = 1;
-        JTextArea groupInput = new JTextArea("Group ");
+        JTextArea groupInput = new JTextArea("Group");
         controlPanel.add(groupInput, c);
 
         c.gridx = 1;
@@ -77,7 +81,7 @@ public class TwitterDemo implements ActionListener {
         JButton addGroupBtn = new JButton("Add Group");
         groCount = new GroupCount(0);
         addGroupBtn.addActionListener(event->{
-            String grpName = groupInput.getText();
+            String grpName = groupInput.getText().trim();
             try{
                 Group newGroup = entityManager.createGroup(grpName);
                 DefaultMutableTreeNode selectedNode2 = (DefaultMutableTreeNode) directoryTree.getLastSelectedPathComponent();
@@ -127,8 +131,32 @@ public class TwitterDemo implements ActionListener {
         controlPanel.add(userCountbtn, c);
 
 
-        //set visible
-        frame.setVisible(true);
+        c.gridx = 0;
+        c.gridy = 5;
+        JButton messageCountbtn = new JButton("Count Messages");
+        messageCountbtn.addActionListener(e->{
+            // countMessage = new UserView(user);
+            // MessageCountStorage = new MessageCount(0);
+            // int MessageInfo = MessageCountStorage.getCount();
+            // int MessageInfo = countMessage.getMessageCount();
+           
+            int MessageInfo = MessageStorage.getInstance().getNumMessages();
+            showNotification("Number of messages", "Total Messages "+ MessageInfo, JOptionPane.INFORMATION_MESSAGE);
+            // System.out.println("Num of Messages: " + MessageInfo);
+        });
+
+        controlPanel.add(messageCountbtn, c);
+
+        c.gridx = 1;
+        c.gridy = 5;
+        JButton countPositivebtn = new JButton("Count Positivity");
+        countPositivebtn.addActionListener(e->{
+        
+            int count = MessageStorage.getInstance().getPos();
+            showNotification("Number of Positive Words", "Total Positive Words: " + count, JOptionPane.INFORMATION_MESSAGE);
+        });
+        
+        controlPanel.add(countPositivebtn, c);
 
         c.gridx = 1;
         c.gridy = 4;
@@ -143,6 +171,8 @@ public class TwitterDemo implements ActionListener {
         controlPanel.add(groupCountbtn, c);
     
 
+        //set visible
+        frame.setVisible(true);
     }
 
 

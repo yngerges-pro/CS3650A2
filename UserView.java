@@ -1,3 +1,4 @@
+// import javax.net.ssl.SSLEngineResult;
 import javax.swing.*;
 
 import java.awt.*;
@@ -6,7 +7,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Collection;
-import java.util.Set;
+// import java.util.Set;
 
 
 public class UserView extends JFrame implements ActionListener, MessageStorage.MessageListener{
@@ -16,7 +17,8 @@ public class UserView extends JFrame implements ActionListener, MessageStorage.M
     private JTextArea newsFeedTextArea;
     private JTextArea Follow;
     private JTextField userToFollowText;
-    private String issue;
+    // private MessageCount countMessage = new MessageCount(0);
+    // private String issue;
     
 
     UserView(User user){
@@ -82,7 +84,7 @@ public class UserView extends JFrame implements ActionListener, MessageStorage.M
         btnFollow.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 //where users follow
-                followUser(userToFollowText.getText());
+                followUser(userToFollowText.getText().trim());
             }
         });
         panel.add(btnFollow, gbc);
@@ -109,7 +111,7 @@ public class UserView extends JFrame implements ActionListener, MessageStorage.M
         panel.add(new JScrollPane(Follow), gbc);
         // panel.add(Follow, gbc);
 
-        issue = userToFollowText.getText().trim();
+        // issue = userToFollowText.getText().trim();
         // Follow.append(issue);
 
     
@@ -148,29 +150,48 @@ public class UserView extends JFrame implements ActionListener, MessageStorage.M
 
     private void displayFeed() {
         Collection<Tweet> tweets = MessageStorage.getInstance().getLatest(this.user);
+        
+        StringBuilder builder = new StringBuilder();
 
-        System.out.println("display Feed called for " + user.getId());
-        // TODO - display the tweet live feed
+        for(Tweet t: tweets) {
+            if(t.getId().equals(user.getId())) {
+                builder.append(String.format("me: %s\n", t.getMsg()));
+            } else {
+                builder.append(String.format("%s: %s\n", t.getId(), t.getMsg()));
+            }
+        }
+ 
+        this.newsFeedTextArea.setText(builder.toString());
     }
 
     private void displayFollowing() {
-        Set<String> following = this.user.following();
+        // Set<String> following = this.user.following();
         System.out.println("display following called for " + user.getId() 
             + " following list = [" + String.join(", ", user.following()) + "]");
-        // TODO - display following list
+
+        this.Follow.setText(String.join("\n", user.following()));
+        displayFeed();
     }
 
     private void followUser(String userId) {
         if(userId != null && !userId.isEmpty()){
-            this.user.follow(userId);
+            if(EntityManager.getInstance().userExists(userId)){
+                this.user.follow(userId);
+            } else {
+                    showNotification("Error", "Unknown user \"" + userId + "\"", JOptionPane.INFORMATION_MESSAGE);
+            }
         }
         displayFollowing();
     }
 
     private void postTweet(String tweet) {
         MessageStorage.getInstance().postTweet(this.user, tweet);
+        // countMessage.Increment();
     }
 
+    // public int getMessageCount(){
+    //     return countMessage.getCount();
+    // }
     // private void updateFollowersList() {
     //     (followersListAdd).setListData(followers.toArray(new String[0]));
     // }
@@ -188,5 +209,8 @@ public class UserView extends JFrame implements ActionListener, MessageStorage.M
        
     }
 
+    private static void showNotification(String title, String message, int messageType) {
+        JOptionPane.showMessageDialog(null, message, title, messageType);
+    }
 }
 

@@ -11,11 +11,14 @@ public class MessageStorage {
     public interface MessageListener {
         void onChange();
     }
+
+    
     
     private static final MessageStorage _instance = new MessageStorage();
     private final LinkedList<Tweet> tweetHistory;
     private final Set<MessageListener> messageListeners;
-
+    public int count2 = 0;
+    
     private MessageStorage(){
         tweetHistory = new LinkedList<>();
         messageListeners = new HashSet<>();
@@ -35,6 +38,35 @@ public class MessageStorage {
         }
     }
 
+     public int getNumMessages() {
+        int num = 0;
+        if(tweetHistory == null){
+            num = 0;
+        }else{
+        num = tweetHistory.size();
+        }
+        return num; //returns number of messages
+    }
+
+    public int getPos(){
+        int countPos = 0;
+        if(tweetHistory != null){
+            String [] positiveWords = {"Thank you", "Good", "Happy"};
+            
+            for(int i = 0; i < positiveWords.length; i++) {
+                for(int k = 0; k < tweetHistory.size(); k++){
+                    if (tweetHistory.get(k).toString() == positiveWords[i]){
+                        countPos += 1;
+                    }
+                }
+            }
+            return countPos;
+        }else{
+            System.out.println("Error");
+            return 0;
+        }
+    }
+
     public Collection<Tweet> getLatest(User user) {
         return getLatest(user, NUM_TWEETS);
     }
@@ -43,7 +75,8 @@ public class MessageStorage {
         List<Tweet> results = new ArrayList<>(numTweets);
 
         for(Tweet t: tweetHistory){
-            if(user.isFollowing(t)) {
+            this.count2 += 1;
+            if(user.isFollowing(t) || t.getId().equals(user.getId())) {
                 results.add(t);
                 if(results.size() >= numTweets) {
                     break;
@@ -53,6 +86,10 @@ public class MessageStorage {
 
         return results;
     }
+
+   
+    
+
 
     public synchronized void addChangeListener(UserView userView) {
         this.messageListeners.add(userView);

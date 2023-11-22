@@ -9,7 +9,7 @@ public class User extends Entity {
     private final Set<String> following;
 
     User(String id) {
-        super(id, EntityTypes.GROUP);
+        super(id, EntityTypes.USER);
         following = new HashSet<>();
     }
 

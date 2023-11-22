@@ -29,4 +29,20 @@ public class EntityManager {
         entityMap.put(id, user);
         return user;
     }
+
+    public boolean userExists(String id) {
+        boolean containsUserId = entityMap.containsKey(id);
+        if(containsUserId) {
+            EntityTypes type = entityMap.get(id).getType();
+
+            if(type == EntityTypes.USER) {
+                return true;
+            }
+        }
+        return  false;
+    }
+
+    public boolean groupExists(String id) {
+        return entityMap.containsKey(id) && entityMap.get(id).getType() == EntityTypes.GROUP;
+    }
 }

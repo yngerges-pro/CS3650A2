@@ -6,6 +6,7 @@ public class EntityManager {
 
     private final Map<String, Entity> entityMap;
 
+
     private EntityManager(){
         entityMap = new HashMap<>();
     }
@@ -13,7 +14,7 @@ public class EntityManager {
     public static EntityManager getInstance() {return _instance;}
 
     public Group createGroup(String id) {
-        if(id == null || id.length() == 0 || entityMap.containsKey(id)) {
+        if(id == null || id.length() == 0) { //|| entityMap.containsKey(id)
             throw new IllegalArgumentException();
         }
         Group g = new Group(id);
@@ -22,7 +23,7 @@ public class EntityManager {
     }
 
     public User createUser(String id) {
-        if(id == null || id.length() == 0 || entityMap.containsKey(id)) {
+        if(id == null || id.length() == 0) { //|| entityMap.containsKey(id)
             throw new IllegalArgumentException();
         }
         User user = new User(id);
@@ -45,4 +46,6 @@ public class EntityManager {
     public boolean groupExists(String id) {
         return entityMap.containsKey(id) && entityMap.get(id).getType() == EntityTypes.GROUP;
     }
+
+    
 }

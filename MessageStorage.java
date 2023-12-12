@@ -28,16 +28,7 @@ public class MessageStorage {
         return _instance;
     }
 
-    public void postTweet(User user, String tweetMsg) {
-        Tweet newTweet = new Tweet(user.getId(), tweetMsg);
-        synchronized(this){
-            tweetHistory.addFirst(newTweet);
-        }
-        for(MessageListener listener: messageListeners) {
-            listener.onChange();
-        }
-    }
-
+    
      public int getNumMessages() {
         int num = 0;
         if(tweetHistory == null){
@@ -87,9 +78,6 @@ public class MessageStorage {
         return results;
     }
 
-   
-    
-
 
     public synchronized void addChangeListener(UserView userView) {
         this.messageListeners.add(userView);
@@ -97,5 +85,17 @@ public class MessageStorage {
 
     public synchronized void removeChangeListener(UserView userView) {
         this.messageListeners.remove(userView);
+    }
+
+    public void postTweet(User user, String tweetMsg, String time) {
+
+        Tweet newTweet = new Tweet(user.getId(), tweetMsg, time);
+        synchronized(this){
+            tweetHistory.addFirst(newTweet);
+        }
+        for(MessageListener listener: messageListeners) {
+            listener.onChange();
+        }
+
     }
 }

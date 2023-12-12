@@ -1,10 +1,12 @@
 public class Tweet {
     private String id;
     private String msg;
-    
-    public Tweet(String id, String msg) {
+    private String time;
+
+    public Tweet(String id, String msg, String time) {
         this.id = id;
         this.msg = msg;
+        this.time = time;
     }
 
     public String getId() {
@@ -13,5 +15,9 @@ public class Tweet {
 
     public String getMsg() {
         return msg;
+    }
+
+    public String getTime(){
+        return time;
     }
 }

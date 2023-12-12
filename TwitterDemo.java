@@ -2,28 +2,31 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-// import javax.swing.tree.TreePath;
+
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-//Add stats on messages and Positive words
-//Look through the patterns
+import java.util.HashMap;
+import java.util.Map;
 
 public class TwitterDemo implements ActionListener {
     private JTree directoryTree;
     private JTextArea userInput;
-    // private String text;
+    
     private final EntityManager entityManager;
     private UserCount userCount;
     private GroupCount groCount;
-    // private MessageCount MessageCountStorage;
-    // private User user;
-    public MessageStorage storage;
-    // private int count;
-    // private UserView countMessage;
-    // public JButton messageCountbtn;
+    
+    private User newUser;
 
+    public MessageStorage storage;
+    private DefaultMutableTreeNode newNode;
+    private String username;
+    
+    private Map<String, Integer> uniqueUsernames = new HashMap<>();
+    
+    private String time;
+  
     TwitterDemo(){
         this.entityManager = EntityManager.getInstance();
         //JFrame
@@ -54,19 +57,50 @@ public class TwitterDemo implements ActionListener {
         JButton addUserBtn = new JButton("Add User");
         userCount = new UserCount(0);
         addUserBtn.addActionListener(event->{
-            String username = userInput.getText().trim();
-            // this.text = username;
+            username = userInput.getText().trim();
+            
             try{
-                User newUser = entityManager.createUser(username);
+                newUser = entityManager.createUser(username);
                 DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) directoryTree.getLastSelectedPathComponent(); //gets last clicked path component
                 if (selectedNode == null) {
                     selectedNode = rootNode;}
-                DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newUser);
+                newNode = new DefaultMutableTreeNode(newUser);
                 selectedNode.add(newNode);
                 model.reload(selectedNode);
                 userCount.Increment();
+                uniqueUsernames.put(username, 1);
+
+                 
+                Timer timer = new Timer(1000, e4 -> {
+                long currentTime = System.currentTimeMillis();
+               
+
+                if (currentTime >= 1000) {
+                    ((Timer) e4.getSource()).stop();
+                }
+
+                long totalSeconds = currentTime / 1000;
+                
+                long minutes = (totalSeconds % 3600) / 60;
+                long seconds = totalSeconds % 60;
+                long hours = (minutes % 3600) / 60;
+
+                if(hours == 0){
+                    hours = 12;
+                }else if(hours >= 13){
+                    hours = hours - 12;
+                }
+                
+                String formattedTime = String.format("%02d:%02d:%02d PT", hours, minutes, seconds);
+                
+                System.out.println("Created User: "+username+" at "+ formattedTime); //Prints the time in the console
+            });
+
+            timer.start();
             } catch(IllegalArgumentException e) {
-                showNotification("Error", "This Name Is Taken", JOptionPane.INFORMATION_MESSAGE);
+                System.out.println("Error "+ e);
+                 
+                
             }
         });
         controlPanel.add(addUserBtn, c);
@@ -91,8 +125,35 @@ public class TwitterDemo implements ActionListener {
                 selectedNode2.add(newNode2);
                 groCount.Increment();
                 model.reload(selectedNode2);
+
+                Timer timer = new Timer(1000, e4 -> {
+                long currentTime = System.currentTimeMillis();
+               
+                if (currentTime >= 1000) {
+                    ((Timer) e4.getSource()).stop();
+                }
+                
+                long totalSeconds = currentTime / 1000;
+                
+                long minutes = (totalSeconds % 3600) / 60;
+                long seconds = totalSeconds % 60;
+                long hours = (minutes % 3600) / 60;
+
+                if(hours == 0){
+                    hours = 12;
+                }else if(hours >= 13){
+                    hours = hours - 12;
+                }
+
+                String formattedTime = String.format("%02d:%02d:%02d PT", hours, minutes, seconds);
+                this.time = formattedTime;
+                System.out.println("Created Group: "+grpName+" at "+ time); //Prints the time in the console
+            });
+
+            timer.start();
             } catch(IllegalArgumentException e) {
-                 showNotification("Error", "This Group Title Is Taken", JOptionPane.INFORMATION_MESSAGE);
+               
+                System.out.println("Error " + e);
             }
         });
         controlPanel.add(addGroupBtn, c);
@@ -101,11 +162,15 @@ public class TwitterDemo implements ActionListener {
         c.gridy = 2;
         c.gridwidth = 2;
         JButton viewUserBtn = new JButton("Show User View");
-        viewUserBtn.addActionListener(e->{
-            DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) directoryTree.getLastSelectedPathComponent(); //gets last clicked path component
+        viewUserBtn.addActionListener(e -> {
+            DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) directoryTree.getLastSelectedPathComponent();
             User user = (User) selectedNode.getUserObject();
-            (new UserView(user)).setVisible(true); // will open UserView
+            
+            new UserView(user).setVisible(true);
         });
+    
+
+         
         controlPanel.add(viewUserBtn, c);
 
         frame.add(directoryTree, BorderLayout.LINE_START);
@@ -135,14 +200,9 @@ public class TwitterDemo implements ActionListener {
         c.gridy = 5;
         JButton messageCountbtn = new JButton("Count Messages");
         messageCountbtn.addActionListener(e->{
-            // countMessage = new UserView(user);
-            // MessageCountStorage = new MessageCount(0);
-            // int MessageInfo = MessageCountStorage.getCount();
-            // int MessageInfo = countMessage.getMessageCount();
-           
+            
             int MessageInfo = MessageStorage.getInstance().getNumMessages();
             showNotification("Number of messages", "Total Messages "+ MessageInfo, JOptionPane.INFORMATION_MESSAGE);
-            // System.out.println("Num of Messages: " + MessageInfo);
         });
 
         controlPanel.add(messageCountbtn, c);
@@ -158,6 +218,7 @@ public class TwitterDemo implements ActionListener {
         
         controlPanel.add(countPositivebtn, c);
 
+       
         c.gridx = 1;
         c.gridy = 4;
         c.gridwidth = 1;
@@ -169,10 +230,93 @@ public class TwitterDemo implements ActionListener {
         });
 
         controlPanel.add(groupCountbtn, c);
+
+        
     
+        GridBagConstraints c2 = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 7;
+        c.gridwidth = 1;
+        
+        //Button that Validates Id based on 2 criterias (no dublicates and no spaces)
+        JButton checkIDButton = new JButton("Validate ID");
+        checkIDButton.addActionListener(e->{
+        if(isDublicate()){
+            showNotification("Unavailable", username + " Is Taken", JOptionPane.INFORMATION_MESSAGE);
+            
+        }else if(username.contains(" ")){
+            showNotification("Error", username + " Is Invalid", JOptionPane.INFORMATION_MESSAGE);
+        }else{
+            showNotification("Vaild", username + " Is Valid and Available", JOptionPane.INFORMATION_MESSAGE);
+        }
+        
+    });
+
+        controlPanel.add(checkIDButton, c);
+
+        
+        
+    c.gridx = 1;
+    c.gridy = 7;
+    c.gridwidth = 1;
+    //Button that shows the latest User to post
+    JButton LatestPostbtn = new JButton("User with Latest Post");
+    LatestPostbtn.addActionListener(e -> {
+        UserView obj = new UserView(newUser);
+        obj.setVisible(false);
+
+        Map<String, String> nameTimings = obj.getLastestUser();
+
+        int index = 0;
+        String AssociatedUser = "";
+
+        String[] Names = new String[nameTimings.size()+2]; // move the initialization outside the loop
+
+        for (Map.Entry<String, String> entry : nameTimings.entrySet()) {
+            
+            String name = entry.getKey();
+            Names[index] = name;
+            index++;
+        }
+
+        AssociatedUser = Names[nameTimings.size()-1]; //gives the last added user in the map
+        showNotification("Latest Posted User", "Latest User: " + AssociatedUser, JOptionPane.INFORMATION_MESSAGE);
+    });
+
+    controlPanel.add(LatestPostbtn, c);
+
+        c2.gridx=0;
+        c2.gridy =6;
+        c2.gridwidth = 2;
+        c2.anchor = GridBagConstraints.CENTER;
+        JLabel text = new JLabel(" ");
+        controlPanel.add(text,c2);
 
         //set visible
         frame.setVisible(true);
+    }
+
+
+    //checks for Dulicates
+    public boolean isDublicate(){
+        String[] keyArray = uniqueUsernames.keySet().toArray(new String[uniqueUsernames.size()]);
+        int i = 0;
+        while(i < keyArray.length){
+            if(keyArray[i].trim().equalsIgnoreCase(username.trim())){
+
+                if(keyArray.length == 1){ 
+                    return true;
+                }else if(i == keyArray.length-1){
+                    return false;
+                }
+
+                return true;
+            }else{
+              i++;
+            }
+        }
+
+        return false;
     }
 
 

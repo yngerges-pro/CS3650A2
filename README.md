@@ -8,5 +8,6 @@ Mini-Twitter
 Used Observer, Singleton, Composite, and Visitor Pattern. 
 
 ## In Addition
-![image](https://github.com/yngerges-pro/CS3650A2/assets/102266055/4565dcc2-6b3b-4b39-8918-bf06dfb93e21)
+![image](https://github.com/yngerges-pro/CS3650A2/assets/102266055/3d016da0-775f-4f6d-9599-bf48e5c985e2)
+
 
